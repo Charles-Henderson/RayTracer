@@ -1,0 +1,26 @@
+#ifndef SPHERE_H
+#define SPHERE_H
+#include <glm\vec3.hpp>
+#include "Object.h"
+#include <glm\gtx\normalize_dot.hpp>
+
+class Sphere : public Object
+{
+public:
+	Sphere(double x, double y, double z, double r, glm::vec3 color, double transparency, double reflectivity);
+	Sphere();
+	bool IntersectionPoint(glm::vec3 eye_p, glm::vec3 ray_v, glm::vec3 &point_p);
+	glm::vec3 GetNormalFromPoint(glm::vec3 point_p);
+	glm::vec3 GetColor();
+	glm::vec3 GetDiffuseColor(glm::vec3 light_p, glm::vec3 point_p, float ambient_const, float diffuse_const);
+	glm::vec3 GetAmbientColor(float ambient_coef);
+
+	Sphere& operator=(Sphere& rhs);
+	double Transparency();
+	double Reflectivity();
+private:
+	double mX, mY, mZ, mR, mTransparency, mReflectivity;
+	glm::vec3 mColor;
+};
+
+#endif
