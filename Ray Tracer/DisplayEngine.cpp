@@ -6,6 +6,8 @@
 #include <glm\vec3.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include "Sphere.h"
+#include "Triangle.h"
+#include "ObjLoader.h"
 #include <iostream>
 #define M_PI 3.14159265358979323846
 glm::vec3 light_p(1.0, 1.0, -1.6);
@@ -20,10 +22,13 @@ double step = 0;
 
 void display::InitGl()
 {
-	scene_objects.push_back(new Sphere(0.0, 0.0, -1.8, 0.2, glm::vec3(0.7529, 0.027, 0.4117), 1.0, 1.0));
-	scene_objects.push_back(new Sphere(0.4, 0.4, -1.6, 0.2, glm::vec3(1.0, 0.0, 1.0), 1.0, 1.0));
-	scene_objects.push_back(new Sphere(-0.3, -0.4, -1.8, 0.2, glm::vec3(0.23, 0.027, 0.4117), 1.0, 1.0));
-	scene_objects.push_back(new Sphere(0, -0.7, -1.6, 0.2, glm::vec3(0.0, 1.0, 1.0), 1.0, 1.0));
+	ObjLoader *boat = new ObjLoader("C:\\Users\\charl_000\\Documents\\Visual Studio 2013\\Projects\\Ray Tracer\\Meshes\\cone.obj", -2);
+//	scene_objects.push_back(new Sphere(0.0, 0.0, -1.8, 0.2, glm::vec3(0.7529, 0.027, 0.4117), 1.0, 1.0));
+//	scene_objects.push_back(new Sphere(0.4, 0.4, -1.6, 0.2, glm::vec3(1.0, 0.0, 1.0), 1.0, 1.0));
+//	scene_objects.push_back(new Sphere(-0.3, -0.4, -1.8, 0.2, glm::vec3(0.23, 0.027, 0.4117), 1.0, 1.0));
+//	scene_objects.push_back(new Sphere(0, -0.7, -1.6, 0.2, glm::vec3(0.0, 1.0, 1.0), 1.0, 1.0));
+//	scene_objects.push_back((Object*) new Triangle(glm::vec3(-0.5, 0, -1.6), glm::vec3(0.5, 0, -1.6), glm::vec3(0, 0.5, -1.6)));
+	scene_objects.push_back((Object*) boat);
 
 	glClearColor(0.0, 0.0, 0.0, 0.0);
 	glEnable(GL_TEXTURE_2D);
@@ -93,9 +98,11 @@ void display::ComputeData()
 	}
 
 	glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, width, height, GL_RGBA, GL_FLOAT, temp_data);
-	glutPostRedisplay();
+//	glutPostRedisplay();
 	light_p.z = -1 - 0.6*(cos(step) + 1) / 2;
 	step += 1.0 / M_PI;
+
+	delete[] temp_data;
 	//std::cout << "First intersection: " << count1 << "\nSecond intersection: " << count2 << std::endl;
 }
 
@@ -127,6 +134,11 @@ glm::vec3 display::TraceRay(glm::vec3 eye_p, glm::vec3 ray_v)
 	bool first_run = true;
 	bool intersect = false;
 	InterSectSpheres(point_p, &first_object, eye_p, ray_v, intersect);
+
+	if (intersect)
+		return first_object->GetDiffuseColor(light_p, point_p, ambient_coef, diffuse_coef);
+	else
+		return glm::vec3(0, 0, 0);
 
 	if (intersect)
 	{
