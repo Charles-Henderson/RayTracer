@@ -9,7 +9,7 @@ namespace display
 	void ComputeData();
 	void InitGl();
 	glm::vec3 TraceRay(glm::vec3 eye_p, glm::vec3 ray_v);
-	void InterSectSpheres(glm::vec3 &point, Object **object, glm::vec3 eye_p, glm::vec3 ray_v, bool &intersect);
+	ColorObject InterSectSceneObjects(glm::vec3 eye_p, glm::vec3 ray_v);
 }
 
 #endif

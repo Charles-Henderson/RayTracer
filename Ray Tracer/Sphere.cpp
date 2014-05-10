@@ -13,51 +13,32 @@ mTransparency(transparency),
 mReflectivity(reflectivity)
 {}
 
-Sphere::Sphere()
-{
-
-}
-
-Sphere& Sphere::operator = (Sphere& rhs)
-{
-	mX = rhs.mX;
-	mY = rhs.mY;
-	mZ = rhs.mZ;
-	mR = rhs.mR;
-	mColor = rhs.mColor;
-	mTransparency = rhs.mTransparency;
-	mReflectivity = rhs.mReflectivity;
-	return *this;
-}
-
-bool Sphere::IntersectionPoint(glm::vec3 eye_p, glm::vec3 ray_v, glm::vec3 &p_p)
+ColorObject Sphere::IntersectionPoint(glm::vec3 eye_p, glm::vec3 ray_v, glm::vec3 light_p)
 {
 	glm::vec3 eye_point_vector = glm::vec3(mX, mY, mZ) - eye_p;
 	double vector_angle = glm::dot(eye_point_vector, ray_v);
 	double self_dot = glm::dot(eye_point_vector, eye_point_vector);
+	glm::vec3 p_p;
 	if (vector_angle < 0.0)
-		return false;
+		return INVALID_COLOR_OBJECT;
 
 	double distance = (mR*mR) - ((self_dot - (vector_angle*vector_angle)));
 	if (distance < 0.0)
-		return false;
+		return INVALID_COLOR_OBJECT;
 	else
 	{
 		distance = sqrt(distance);
 		p_p = eye_p + (float(vector_angle - distance) * ray_v);
 	}
-	return true;
+	glm::vec3 ambient_color = GetAmbientColor(0.2);
+	glm::vec3 diffuse_color = GetDiffuseColor(light_p, p_p, 0.2,1.0 - 0.2);
+	return ColorObject(ambient_color, diffuse_color, p_p, true); 
 }
 
 
 glm::vec3 Sphere::GetNormalFromPoint(glm::vec3 point_p)
 {
 	return glm::normalize(point_p - glm::vec3(mX, mY, mZ));
-}
-
-glm::vec3 Sphere::GetColor()
-{
-	return mColor;
 }
 
 glm::vec3 Sphere::GetDiffuseColor(glm::vec3 light_p, glm::vec3 point_p, float ambient_const, float diffuse_const)

@@ -1,6 +1,8 @@
 #include "ObjLoader.h"
 #include <fstream>
 #include <iostream>
+#include <glm\gtx\normalize_dot.hpp>
+#include <algorithm>
 
 ObjLoader::ObjLoader(std::string path, float z_plane_compensation)
 {
@@ -8,7 +10,7 @@ ObjLoader::ObjLoader(std::string path, float z_plane_compensation)
 	//v is vertex
 	//vn is vertex normal
 	//f is face v//vn is syntax for vertex/vertex normal index. these start at 1 instead of 0
-	
+	mColor = glm::vec3(1.0, 1.0, 1.0);
 	std::string line;
 	std::string value;
 	std::ifstream my_file(path);
@@ -63,9 +65,10 @@ ObjLoader::ObjLoader(std::string path, float z_plane_compensation)
 }
 
 
-bool ObjLoader::IntersectionPoint(glm::vec3 eye_p, glm::vec3 ray_v, glm::vec3 &point_p)
+ColorObject ObjLoader::IntersectionPoint(glm::vec3 eye_p, glm::vec3 ray_v, glm::vec3 light_p)
 {
-	glm::vec3 current_point;
+//	glm::vec3 point_p, current_point;
+	Triangle closest_face, current_face;
 	bool first = true;
 	for (int i = 0; i < mFaces.size(); i++)
 	{
@@ -74,30 +77,45 @@ bool ObjLoader::IntersectionPoint(glm::vec3 eye_p, glm::vec3 ray_v, glm::vec3 &p
 		p2 = mVertices[mFaces[i].vertex_indexes[1]];
 		p3 = mVertices[mFaces[i].vertex_indexes[2]];
 		Triangle my_face(p1, p2, p3);
-		float u, v;
-		bool intersect = my_face.IntersectionPoint(eye_p, ray_v, current_point, u, v);
+		bool intersect = my_face.IntersectionPoint(eye_p, ray_v);
 		if (intersect)
 		{
+			current_face = my_face;
 			if (first)
 			{
-				point_p = current_point;
+				closest_face = current_face;
 				first = false;
 			}
-			else if (point_p[2] < current_point[2])
+			else if (current_face.GetIntersectionPoint().z < closest_face.GetIntersectionPoint().z)
 			{
-				point_p = current_point;
+				closest_face = current_face;
 			}
 		}
 	}
 
 	if (first)
-		return false;
+		return INVALID_COLOR_OBJECT;
 	else
-		return true;
+	{
+		glm::vec3 ambient_color = GetAmbientColor(0.2);
+		glm::vec3 diffuse_color = GetDiffuseColor(closest_face.GetNormal(), light_p, closest_face.GetIntersectionPoint(), 0.2, 1.0 - 0.2);
+		return ColorObject(ambient_color, diffuse_color, closest_face.GetIntersectionPoint(), true);
+	}
 }
 
-glm::vec3 ObjLoader::GetColor(){ return glm::vec3(0,0,0); }
-glm::vec3 ObjLoader::GetDiffuseColor(glm::vec3 light_p, glm::vec3 point_p, float ambient_const, float diffuse_const){ return glm::vec3(1.0,0,0); }
-glm::vec3 ObjLoader::GetAmbientColor(float ambient_coef){ return glm::vec3(0,0,0); }
+glm::vec3 ObjLoader::GetDiffuseColor(glm::vec3 normal, glm::vec3 light_p, glm::vec3 point_p, float ambient_const, float diffuse_const)
+{
+	double inverse_angle = glm::normalizeDot(normal, light_p - point_p);
+	inverse_angle = std::max(inverse_angle, 0.0);
+	inverse_angle = inverse_angle*inverse_angle;
+
+	return float(ambient_const + inverse_angle*diffuse_const)*mColor;
+}
+
+glm::vec3 ObjLoader::GetAmbientColor(float ambient_coef)
+{
+	return mColor*ambient_coef;
+}
+
 double ObjLoader::Transparency(){ return 0; }
 double ObjLoader::Reflectivity(){ return 0; }

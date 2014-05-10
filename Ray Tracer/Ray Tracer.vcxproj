@@ -86,6 +86,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="DisplayEngine.cpp" />
+    <ClCompile Include="Object.cpp" />
     <ClCompile Include="ObjLoader.cpp" />
     <ClCompile Include="Ray Tracer.cpp" />
     <ClCompile Include="Sphere.cpp" />

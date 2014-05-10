@@ -6,9 +6,13 @@ class Triangle
 {
 public:
 	Triangle(glm::vec3 one, glm::vec3 two, glm::vec3 three);
-	bool IntersectionPoint(glm::vec3 eye_p, glm::vec3 ray_v, glm::vec3 &point_p, float& u_coord, float& v_coord);
+	Triangle();
+	bool IntersectionPoint(glm::vec3 eye_p, glm::vec3 ray_v);
+	glm::vec3 GetNormal();
+	glm::vec3 GetIntersectionPoint();
 private:
-	glm::vec3 point_1, point_2, point_3;
+	glm::vec3 mLastIntersectionPoint;
+	glm::vec3 mPoint1, mPoint2, mPoint3;
 };
 
 #endif
